@@ -37,12 +37,37 @@ function getValidMoves(currentMove, x, y) {
   return validMoves;
 }
 
-function populateMaze(x, y) {
-  let currentMove = maze[0][0];
-  const path = [];
+function getEdge(x, y) {
+  const edge = getRandomInt(0, 3);
+  const edgeMap = {
+    0: () => maze[0][getRandomInt(0, x - 1)],
+    1: () => maze[getRandomInt(0, y - 1)][x - 1],
+    2: () => maze[y - 1][getRandomInt(0, x - 1)],
+    3: () => maze[getRandomInt(0, y - 1)][0],
+  };
+  const fn = edgeMap[edge];
+  if (fn) {
+    const move = fn();
+    if (move.x === 0) {
+      move.walls[3] = 0;
+    } else if (move.y === 0) {
+      move.walls[0] = 0;
+    } else if (move.x === x - 1) {
+      move.walls[1] = 0;
+    } else if (move.y === y - 1) {
+      move.walls[2] = 0;
+    }
+    return move;
+  }
+}
 
+function populateMaze(x, y) {
+  let currentMove = getEdge(x, y);
+  currentMove.firstMove = true;
+  const path = [];
+  const exit = getEdge(x, y);
+  maze[exit.y][exit.x] = exit;
   currentMove.visited = true;
-  currentMove.walls[3] = 0;
   path.push(currentMove);
   let i = 0;
   while (i < (x * y) - 1) {
@@ -84,9 +109,6 @@ function populateMaze(x, y) {
       maze[currentMove.y][currentMove.x] = currentMove;
       // move to new cell
       nextMove.visited = true;
-      if (i === (x * y) - 1) {
-        nextMove.lastMove = true;
-      }
       currentMove = nextMove;
       path.push(currentMove);
     } else {
@@ -111,7 +133,7 @@ function buildMaze(x, y) {
 }
 
 
-const builtMaze = buildMaze(20, 20);
+const builtMaze = buildMaze(10, 10);
 
 builtMaze.forEach((mazeRow, index) => {
   let topRow = '';
@@ -120,34 +142,30 @@ builtMaze.forEach((mazeRow, index) => {
   // draw top row
   mazeRow.forEach((cell) => {
     // build top row
-    cell.walls[0] === 1 ? topRow += '@@@' : topRow += '@ @';
+    cell.walls[0] === 1 ? topRow += '####' : topRow += '#  #';
 
     // build middle row
     if (cell.walls[3] === 1 && cell.walls[1] === 0) {
       // right opening only
-      middleRow += '@  ';
+      middleRow += '#   ';
     }
 
     if (cell.walls[3] === 0 && cell.walls[1] === 1) {
     // left open only
-      middleRow += '  @';
+      middleRow += '   #';
     }
 
     if (cell.walls[3] === 0 && cell.walls[1] === 0) {
       // both ends open
-      middleRow += '   ';
+      middleRow += '    ';
     }
 
     if (cell.walls[3] === 1 && cell.walls[1] === 1) {
-      middleRow += '@ @';
-    }
-
-    if (cell.lastMove) {
-      middleRow = `${middleRow.substr(0, middleRow.length - 2)}*${middleRow.substr(middleRow.length - 1)}`;
+      middleRow += '#  #';
     }
 
     // build bottom row
-    cell.walls[2] === 1 ? bottomRow += '@@@' : bottomRow += '@ @';
+    cell.walls[2] === 1 ? bottomRow += '####' : bottomRow += '#  #';
   });
 
   if (index === 0) {
