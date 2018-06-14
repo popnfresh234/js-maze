@@ -1,4 +1,4 @@
-const maze = [];
+let maze = [];
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -118,6 +118,7 @@ function populateMaze(x, y) {
 }
 
 function buildMaze(x, y) {
+  maze = [];
   for (let i = 0; i < y; i++) {
     const row = [];
     for (let j = 0; j < x; j++) {
@@ -131,7 +132,68 @@ function buildMaze(x, y) {
   return maze;
 }
 
-module.exports = {
-  buildMaze,
-};
+function drawMaze(inputX, inputY) {
+  const WALL_LENGTH = 50;
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.canvas.width = inputX * WALL_LENGTH;
+  ctx.canvas.height = inputY * WALL_LENGTH;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  buildMaze(inputX, inputY);
+
+  // maze accessed in y,x format
+  for (let y = 0; y < inputY; y++) {
+    for (let x = 0; x < inputX; x++) {
+      const testCell = maze[y][x];
+
+      // Top line for first row only
+      if (testCell.walls[0] && y === 0) {
+        ctx.beginPath();
+        ctx.moveTo(x * WALL_LENGTH, y);
+        ctx.lineTo((x * WALL_LENGTH) + WALL_LENGTH, y);
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      // Right wall
+      if (testCell.walls[1]) {
+        ctx.beginPath();
+        ctx.moveTo(x * WALL_LENGTH + WALL_LENGTH, y * WALL_LENGTH);
+        ctx.lineTo(x * WALL_LENGTH + WALL_LENGTH, y * WALL_LENGTH + WALL_LENGTH);
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      // Bottom line for all other rows
+      if (testCell.walls[2]) {
+        ctx.beginPath();
+        ctx.moveTo(x * WALL_LENGTH, y * WALL_LENGTH + WALL_LENGTH);
+        ctx.lineTo(x * WALL_LENGTH + WALL_LENGTH, y * WALL_LENGTH + WALL_LENGTH);
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      // Left wall
+      if (testCell.walls[3]) {
+        ctx.beginPath();
+        ctx.moveTo(x * WALL_LENGTH, y * WALL_LENGTH);
+        ctx.lineTo(x * WALL_LENGTH, y * WALL_LENGTH + WALL_LENGTH);
+        ctx.stroke();
+        ctx.closePath();
+      }
+    }
+  }
+}
+
+
+$(document).ready(() => {
+  $('#maze-input').submit((ev) => {
+    ev.preventDefault();
+    const mazex = $('#mazex').val();
+    const mazey = $('#mazey').val();
+    if (mazex && mazey) {
+      drawMaze(mazex, mazey);
+    }
+  });
+});
 

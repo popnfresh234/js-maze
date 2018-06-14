@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+
+</head>
+
+<body>
+    <div class="canvas">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div class="maze-input">
+        <form id='maze-input'>
+            <fieldset>
+                <legend>Build a maze!</legend>
+                <label for="mazex">Maze width: </label>
+                <input type="number" class="field" name="mazex" id="mazex" value="10" placeholder="10" />
+                <br />
+                <label for="mazey">Maze height: </label>
+                <input type="number" name="mazey" class="field" id="mazey" value="10" placeholder="10" />
+                <br />
+                <button type="submit">Generate Maze</button>
+            </fieldset>
+        </form>
+
+</body>
+
+</html>
