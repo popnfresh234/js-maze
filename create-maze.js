@@ -66,6 +66,7 @@ function populateMaze(x, y) {
   currentMove.firstMove = true;
   const path = [];
   const exit = getEdge(x, y);
+  exit.lastMove = true;
   maze[exit.y][exit.x] = exit;
   currentMove.visited = true;
   path.push(currentMove);

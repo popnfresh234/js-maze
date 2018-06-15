@@ -1,4 +1,5 @@
 let maze = [];
+const WALL_LENGTH = 50;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -64,8 +65,10 @@ function getEdge(x, y) {
 function populateMaze(x, y) {
   let currentMove = getEdge(x, y);
   currentMove.firstMove = true;
+  currentMove.currentPosition = true;
   const path = [];
   const exit = getEdge(x, y);
+  exit.lastMove = true;
   maze[exit.y][exit.x] = exit;
   currentMove.visited = true;
   path.push(currentMove);
@@ -133,7 +136,6 @@ function buildMaze(x, y) {
 }
 
 function drawMaze(inputX, inputY) {
-  const WALL_LENGTH = 50;
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   ctx.canvas.width = inputX * WALL_LENGTH;
@@ -145,7 +147,16 @@ function drawMaze(inputX, inputY) {
   for (let y = 0; y < inputY; y++) {
     for (let x = 0; x < inputX; x++) {
       const testCell = maze[y][x];
-
+      // Fill in square if entrance
+      if (testCell.firstMove) {
+        ctx.fillStyle = 'rgba(0,255,0,0.2';
+        ctx.fillRect(testCell.x * WALL_LENGTH, testCell.y * WALL_LENGTH, WALL_LENGTH, WALL_LENGTH);
+      }
+      // Fill in exit
+      if (testCell.lastMove) {
+        ctx.fillStyle = 'rgba(255,0,0,0.2';
+        ctx.fillRect(testCell.x * WALL_LENGTH, testCell.y * WALL_LENGTH, WALL_LENGTH, WALL_LENGTH);
+      }
       // Top line for first row only
       if (testCell.walls[0] && y === 0) {
         ctx.beginPath();
@@ -185,6 +196,52 @@ function drawMaze(inputX, inputY) {
   }
 }
 
+function getCurrentPosition() {
+  let currentPosition = {};
+  maze.forEach((row) => {
+    row.forEach((cell) => {
+      if (cell.currentPosition) {
+        currentPosition = cell;
+      }
+    });
+  });
+  return currentPosition;
+}
+
+function move(dir) {
+  const currentPosition = getCurrentPosition();
+  const { walls } = currentPosition;
+  const dirs = [0, 1, 2, 3];
+  const dirMap = dirs.reduce((agg, curr) => {
+    if (curr === 0 && currentPosition.y - 1 >= 0 && !walls[curr]) {
+      agg[curr] = () => maze[currentPosition.y - 1][currentPosition.x];
+    }
+    if (curr === 1 && currentPosition.x + 1 < maze.length && !walls[curr]) {
+      agg[curr] = () => maze[currentPosition.y][currentPosition.x + 1];
+    }
+    if (curr === 2 && currentPosition.y + 1 < maze.length && !walls[curr]) {
+      agg[curr] = () => maze[currentPosition.y + 1][currentPosition.x];
+    }
+
+    if (curr === 3 && currentPosition.x - 1 >= 0 && !walls[curr]) {
+      agg[curr] = () => maze[currentPosition.y][currentPosition.x - 1];
+    }
+    return agg;
+  }, {});
+
+  const fn = dirMap[dir];
+  if (fn) {
+    currentPosition.currentPosition = false;
+    const newPosition = fn();
+    newPosition.currentPosition = true;
+    maze[newPosition.y][newPosition.x] = newPosition;
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0,255,0,0.2';
+    ctx.fillRect(newPosition.x * WALL_LENGTH, newPosition.y * WALL_LENGTH, WALL_LENGTH, WALL_LENGTH);
+  }
+}
+
 
 $(document).ready(() => {
   $('#maze-input').submit((ev) => {
@@ -193,6 +250,21 @@ $(document).ready(() => {
     const mazey = $('#mazey').val();
     if (mazex && mazey) {
       drawMaze(mazex, mazey);
+    }
+  });
+
+  $(document).keydown((event) => {
+    event.preventDefault();
+    const keyMap = {
+      ArrowUp: () => move(0),
+      ArrowRight: () => move(1),
+      ArrowDown: () => move(2),
+      ArrowLeft: () => move(3),
+    };
+
+    const fn = keyMap[event.key];
+    if (fn) {
+      fn();
     }
   });
 });
