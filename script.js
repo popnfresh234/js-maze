@@ -1,5 +1,10 @@
+const game = {
+  finished: false,
+};
+
 let maze = [];
 const WALL_LENGTH = 50;
+
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -136,6 +141,8 @@ function buildMaze(x, y) {
 }
 
 function drawMaze(inputX, inputY) {
+  // reset game
+  game.finished = false;
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
   ctx.canvas.width = inputX * WALL_LENGTH;
@@ -239,6 +246,11 @@ function move(dir) {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = 'rgba(0,255,0,0.2';
     ctx.fillRect(newPosition.x * WALL_LENGTH, newPosition.y * WALL_LENGTH, WALL_LENGTH, WALL_LENGTH);
+    if (newPosition.lastMove) {
+      newPosition.currentPosition = false;
+      game.finished = true;
+      alert('FINISHED');
+    }
   }
 }
 
@@ -254,18 +266,23 @@ $(document).ready(() => {
   });
 
   $(document).keydown((event) => {
-    event.preventDefault();
-    const keyMap = {
-      ArrowUp: () => move(0),
-      ArrowRight: () => move(1),
-      ArrowDown: () => move(2),
-      ArrowLeft: () => move(3),
-    };
+    if (event.key === 'ArrowUp' || event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
+      event.preventDefault();
+      if (game.finished) {
+        alert('Game complete, generate new maze');
+      } else {
+        const keyMap = {
+          ArrowUp: () => move(0),
+          ArrowRight: () => move(1),
+          ArrowDown: () => move(2),
+          ArrowLeft: () => move(3),
+        };
 
-    const fn = keyMap[event.key];
-    if (fn) {
-      fn();
+        const fn = keyMap[event.key];
+        if (fn) {
+          fn();
+        }
+      }
     }
   });
 });
-
