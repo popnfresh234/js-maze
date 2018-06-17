@@ -28,6 +28,7 @@ const player = {
 };
 
 function runEncounter(playerMove) {
+  let move = playerMove;
   randomEncounter.players.sort((playerA, playerB) => playerA.remaining - playerB.remaining);
   const nextPlayer = randomEncounter.players[0];
   randomEncounter.players.forEach((player) => {
@@ -40,49 +41,29 @@ function runEncounter(playerMove) {
   });
   // If the next player is the CPU, run random move
   if (nextPlayer.cpu) {
-    const move = nextPlayer.moves[getRandomInt(0, nextPlayer.moves.length - 1)];
-
-    let target = {};
-    if (move.name === 'heal') {
-      target = nextPlayer;
-    } else {
-      target = randomEncounter.players[1];
-    }
-    target.hp -= move.damage;
-    $('.console').append(`<p>${nextPlayer.name} uses ${move.name}</p>`);
-    $('.console').append(`<p>${nextPlayer.name} HP=${nextPlayer.hp}`);
-    $('.console').append(`<p>${target.name} HP=${target.hp}`);
-    if (target.hp <= 0) {
-      if (target.cpu) {
-        target.hp = target.hpMax;
-      }
-      randomEncounter.finished = true;
-      $('.console').append(`<p>${target.name} is dead!</p>`);
-      $('.console').append(`<p>Winner is ${nextPlayer.name}</p>`);
-    }
+    move = nextPlayer.moves[getRandomInt(0, nextPlayer.moves.length - 1)];
+  }
+  let target = {};
+  if (move.name === 'heal') {
+    target = nextPlayer;
   } else {
-    let target = {};
-    if (playerMove.name === 'heal') {
-      target = nextPlayer;
-    } else {
-      target = randomEncounter.players[1];
+    target = randomEncounter.players[1];
+  }
+  target.hp -= move.damage;
+  $('.console').append(`<p class="player-name">${nextPlayer.name} uses ${move.name}</p>`);
+  $('.console').append(`<p class="status-update">${nextPlayer.name} HP=${nextPlayer.hp} ${target.name} HP=${target.hp}</p>`);
+  if (target.hp <= 0) {
+    if (target.cpu) {
+      target.hp = target.hpMax;
     }
-    target.hp -= playerMove.damage;
-    $('.console').append(`<p>${nextPlayer.name} uses ${playerMove.name}</p>`);
-    $('.console').append(`<p>${nextPlayer.name} HP=${nextPlayer.hp}`);
-    $('.console').append(`<p>${target.name} HP=${target.hp}`);
-    if (target.hp <= 0) {
-      if (target.cpu) {
-        target.hp = target.hpMax;
-      }
-      randomEncounter.finished = true;
-      $('.console').append(`<p>${target.name} is dead!</p>`);
-      $('.console').append(`<p>Winner is ${nextPlayer.name}</p>`);
-    } else {
-      runEncounter();
-    }
+    randomEncounter.finished = true;
+    $('.console').append(`<p>${target.name} is dead!</p>`);
+    $('.console').append(`<p>Winner is ${nextPlayer.name}</p>`);
+  } else if (!nextPlayer.cpu) {
+    runEncounter();
   }
 }
+
 
 function setupEncounter() {
   randomEncounter.finished = false;
@@ -102,9 +83,8 @@ $(document).on('click', '.control-button', (event) => {
     const move = player.moves.filter((playerMove) => {
       if (playerMove.name === event.target.name) {
         return playerMove;
-      }
+      } return false;
     })[0];
-
     runEncounter(move);
   } else {
     alert('DONE');

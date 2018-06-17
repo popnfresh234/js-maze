@@ -10,7 +10,15 @@
 }
 
 .console{
-    height: 30vh;
+    height: 100vh;
     margin-left: 20%;
     overflow-y: scroll;
+}
+
+.player-name{
+    color: blue;
+}
+
+.status-update{
+    color:green;
 }
