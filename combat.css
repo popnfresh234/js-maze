@@ -4,12 +4,15 @@
 }
 
 .controls{
+    padding: 2em;
     float: left;
     width: 20%;
 
 }
 
 .console{
+    background-color: rgba(0, 0, 255, 0.1);
+    padding-left: 2em;
     height: 100vh;
     margin-left: 20%;
     overflow-y: scroll;

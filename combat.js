@@ -1,10 +1,10 @@
 function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * ((max - min) + 1)) + min;
 }
 
 const randomEncounter = {
   finished: false,
-  players: [],
+  combatants: [],
 };
 
 const enemy = {
@@ -13,8 +13,8 @@ const enemy = {
   hp: 100,
   hpMax: 100,
   moves: [{ name: 'attack', damage: 20 }, { name: 'heal', damage: -5 }],
-  cycle: 1.2,
-  remaining: 1.2,
+  cycle: 2.6,
+  remaining: 2.6,
 };
 
 const player = {
@@ -27,32 +27,41 @@ const player = {
   remaining: 1.8,
 };
 
+function updateStats() {
+  $('.player-status').replaceWith(`<div class="player-status"><p>${player.name} HP: ${player.hp}</p></div>`);
+  $('.cpu-status').replaceWith(`<div class="cpu-status"><p>${enemy.name} HP: ${enemy.hp}</p></div>`);
+}
+
 function runEncounter(playerMove) {
   let move = playerMove;
-  randomEncounter.players.sort((playerA, playerB) => playerA.remaining - playerB.remaining);
-  const nextPlayer = randomEncounter.players[0];
-  randomEncounter.players.forEach((player) => {
+  randomEncounter.combatants.sort((playerA, playerB) => playerA.remaining - playerB.remaining);
+  const nextPlayer = randomEncounter.combatants[0];
+  randomEncounter.combatants.forEach((combatant) => {
     // Reduce everyone's remaining time by the next player's cycle
-    player.remaining -= nextPlayer.cycle;
+    combatant.remaining -= nextPlayer.cycle;
     // Reset cycle if
-    if (player.remaining <= 0) {
-      player.remaining = player.cycle;
+    if (combatant.remaining <= 0) {
+      combatant.remaining = combatant.cycle;
     }
   });
   // If the next player is the CPU, run random move
   if (nextPlayer.cpu) {
     move = nextPlayer.moves[getRandomInt(0, nextPlayer.moves.length - 1)];
   }
-  let target = {};
-  if (move.name === 'heal') {
-    target = nextPlayer;
-  } else {
-    target = randomEncounter.players[1];
+  let target = randomEncounter.combatants[1];
+  const selfMap = {
+    heal: () => nextPlayer,
+  };
+  const selfFn = selfMap[move.name];
+  if (selfFn) {
+    target = selfFn();
   }
-  target.hp -= move.damage;
+  target.hp - move.damage > target.hpMax
+    ? target.hp = target.hpMax
+    : target.hp = Math.max(0, target.hp - move.damage);
   $('.console').append(`<p class="player-name">${nextPlayer.name} uses ${move.name}</p>`);
-  $('.console').append(`<p class="status-update">${nextPlayer.name} HP=${nextPlayer.hp} ${target.name} HP=${target.hp}</p>`);
-  if (target.hp <= 0) {
+  updateStats();
+  if (target.hp === 0) {
     if (target.cpu) {
       target.hp = target.hpMax;
     }
@@ -62,16 +71,21 @@ function runEncounter(playerMove) {
   } else if (!nextPlayer.cpu) {
     runEncounter();
   }
+  $('.console').scrollTop($('.console')[0].scrollHeight);
 }
 
 
 function setupEncounter() {
+  updateStats();
   randomEncounter.finished = false;
-  randomEncounter.players.push(enemy, player);
+  randomEncounter.combatants.push(enemy, player);
   player.moves.forEach((move) => {
     $('.controls').append(`<button class="control-button" name="${move.name}">${move.name}</button>`);
   });
-  runEncounter();
+  randomEncounter.combatants.sort((playerA, playerB) => playerA.remaining - playerB.remaining);
+  if (randomEncounter.combatants[0].cpu) {
+    runEncounter();
+  }
 }
 
 $(document).ready(() => {
