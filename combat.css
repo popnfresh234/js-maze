@@ -1,0 +1,16 @@
+.content{
+    width: 100%;
+    height: 100vh;
+}
+
+.controls{
+    float: left;
+    width: 20%;
+
+}
+
+.console{
+    height: 30vh;
+    margin-left: 20%;
+    overflow-y: scroll;
+}

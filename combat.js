@@ -2,14 +2,19 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const randomEncounter = {
+  finished: false,
+  players: [],
+};
+
 const enemy = {
   name: 'Orc',
   cpu: true,
   hp: 100,
   hpMax: 100,
   moves: [{ name: 'attack', damage: 20 }, { name: 'heal', damage: -5 }],
-  cycle: 2.6,
-  remaining: 2.6,
+  cycle: 1.2,
+  remaining: 1.2,
 };
 
 const player = {
@@ -22,28 +27,19 @@ const player = {
   remaining: 1.8,
 };
 
-function randomEncounter(enemy, player) {
-  const randomEncounter = {
-    finished: false,
-    players: [],
-  };
-
-  randomEncounter.players.push(enemy, player);
-  randomEncounter.currentPlayer = randomEncounter.players[0];
-
-  while (!randomEncounter.finished) {
-    // Sort players by time remaining to find who goes next
-    randomEncounter.players.sort((playerA, playerB) => playerA.remaining - playerB.remaining);
-    const nextPlayer = randomEncounter.players[0];
-    randomEncounter.players.forEach((player) => {
-      // Reduce everyone's remaining time by the next player's cycle
-      player.remaining -= nextPlayer.cycle;
-      // Reset cycle if
-      if (player.remaining <= 0) {
-        player.remaining = player.cycle;
-      }
-    });
-    // Get a random move from the next player
+function runEncounter(playerMove) {
+  randomEncounter.players.sort((playerA, playerB) => playerA.remaining - playerB.remaining);
+  const nextPlayer = randomEncounter.players[0];
+  randomEncounter.players.forEach((player) => {
+    // Reduce everyone's remaining time by the next player's cycle
+    player.remaining -= nextPlayer.cycle;
+    // Reset cycle if
+    if (player.remaining <= 0) {
+      player.remaining = player.cycle;
+    }
+  });
+  // If the next player is the CPU, run random move
+  if (nextPlayer.cpu) {
     const move = nextPlayer.moves[getRandomInt(0, nextPlayer.moves.length - 1)];
 
     let target = {};
@@ -53,17 +49,65 @@ function randomEncounter(enemy, player) {
       target = randomEncounter.players[1];
     }
     target.hp -= move.damage;
-    console.log(`${nextPlayer.name} uses ${move.name}`);
+    $('.console').append(`<p>${nextPlayer.name} uses ${move.name}</p>`);
+    $('.console').append(`<p>${nextPlayer.name} HP=${nextPlayer.hp}`);
+    $('.console').append(`<p>${target.name} HP=${target.hp}`);
     if (target.hp <= 0) {
       if (target.cpu) {
         target.hp = target.hpMax;
       }
       randomEncounter.finished = true;
-      console.log(`${target.name} is dead!`);
-      console.log(`Winner is ${nextPlayer.name}`);
+      $('.console').append(`<p>${target.name} is dead!</p>`);
+      $('.console').append(`<p>Winner is ${nextPlayer.name}</p>`);
+    }
+  } else {
+    let target = {};
+    if (playerMove.name === 'heal') {
+      target = nextPlayer;
+    } else {
+      target = randomEncounter.players[1];
+    }
+    target.hp -= playerMove.damage;
+    $('.console').append(`<p>${nextPlayer.name} uses ${playerMove.name}</p>`);
+    $('.console').append(`<p>${nextPlayer.name} HP=${nextPlayer.hp}`);
+    $('.console').append(`<p>${target.name} HP=${target.hp}`);
+    if (target.hp <= 0) {
+      if (target.cpu) {
+        target.hp = target.hpMax;
+      }
+      randomEncounter.finished = true;
+      $('.console').append(`<p>${target.name} is dead!</p>`);
+      $('.console').append(`<p>Winner is ${nextPlayer.name}</p>`);
+    } else {
+      runEncounter();
     }
   }
 }
 
-randomEncounter(enemy, player);
-console.log(player);
+function setupEncounter() {
+  randomEncounter.finished = false;
+  randomEncounter.players.push(enemy, player);
+  player.moves.forEach((move) => {
+    $('.controls').append(`<button class="control-button" name="${move.name}">${move.name}</button>`);
+  });
+  runEncounter();
+}
+
+$(document).ready(() => {
+  setupEncounter();
+});
+
+$(document).on('click', '.control-button', (event) => {
+  if (!randomEncounter.finished) {
+    const move = player.moves.filter((playerMove) => {
+      if (playerMove.name === event.target.name) {
+        return playerMove;
+      }
+    })[0];
+
+    runEncounter(move);
+  } else {
+    alert('DONE');
+  }
+});
+
