@@ -245,7 +245,7 @@ function move(dir) {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = 'rgba(0,255,0,0.2';
-    ctx.fillRect(newPosition.x * WALL_LENGTH, newPosition.y * WALL_LENGTH, WALL_LENGTH, WALL_LENGTH);
+    ctx.fillRect(newPosition.x * WALL_LENGTH + 1, newPosition.y * WALL_LENGTH + 1, WALL_LENGTH - 1, WALL_LENGTH - 1);
     if (newPosition.lastMove) {
       newPosition.currentPosition = false;
       game.finished = true;
