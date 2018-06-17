@@ -7,6 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
     <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"/>    
+    <link rel="stylesheet" type="text/css" href="combat.css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script src="jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
@@ -14,22 +16,44 @@
 </head>
 
 <body>
-    <div class="canvas">
-        <canvas id="canvas"></canvas>
+    <div class="root-container">
+        <div class="left-col">
+            <div class="canvas">
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="maze-input">
+                <form id='maze-input'>
+                    <fieldset>
+                        <legend>Build a maze!</legend>
+                        <label for="mazex">Maze width: </label>
+                        <input type="number" class="field" name="mazex" id="mazex" value="10" placeholder="10" />
+                        <br />
+                        <label for="mazey">Maze height: </label>
+                        <input type="number" name="mazey" class="field" id="mazey" value="10" placeholder="10" />
+                        <br />
+                        <button type="submit">Generate Maze</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="right-col">
+            <div class="combat-content">
+                <div class="control-container">
+                    <div class="status">
+                        <div class="player-status"></div>
+                        <div class="cpu-status"></div>
+                    </div>
+                    <div class="controls">
+                        
+                    </div>
+                    <div class="status"></div>
+                </div>
+                <div class="console"></div>
+            </div>
+        </div>
     </div>
-    <div class="maze-input">
-        <form id='maze-input'>
-            <fieldset>
-                <legend>Build a maze!</legend>
-                <label for="mazex">Maze width: </label>
-                <input type="number" class="field" name="mazex" id="mazex" value="10" placeholder="10" />
-                <br />
-                <label for="mazey">Maze height: </label>
-                <input type="number" name="mazey" class="field" id="mazey" value="10" placeholder="10" />
-                <br />
-                <button type="submit">Generate Maze</button>
-            </fieldset>
-        </form>
+
+
 
 </body>
 

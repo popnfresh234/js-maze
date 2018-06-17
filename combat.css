@@ -1,9 +1,11 @@
-.content{
+.combat-content{
     width: 100%;
     height: 100vh;
 }
 
-.controls{
+
+
+.control-container{
     padding: 2em;
     float: left;
     width: 20%;
